@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コード公開ページ</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <header>
+        <h1>コード公開ページ</h1>
+        <p>バッチスクリプトなどを公開しています。</p>
+    </header>
+
+    <main>
+        <section class="code-block">
+            <h2 class="code-title">サンプルスクリプト1: Hello World</h2>
+            <div class="code-content">
+                <pre><code>@echo off
+    echo Hello, World!
+    pause
+</code></pre>
+            </div>
+        </section>
+
+        <section class="code-block collapsible">
+            <h2 class="code-title">乱数生成プログラム（クリックで展開）</h2>
+            <div class="code-content">
+                <pre><code>@echo off
+rem =================================================================
+rem ファイルバックアップスクリプト
+rem 指定されたフォルダのファイルを、日付付きのフォルダにコピーします。
+rem =================================================================
+
+setlocal enabledelayedexpansion
+
+rem --- 設定 ---
+set "BACKUP_SOURCE=C:\Users\YourUser\Documents"
+set "BACKUP_DESTINATION=D:\Backup"
+rem --- 設定ここまで ---
+
+rem 日付と時刻の取得
+for /f "tokens=1-3 delims=/ " %%a in ('date /t') do set "DT_Y=%%a" & set "DT_M=%%b" & set "DT_D=%%c"
+for /f "tokens=1-2 delims=: " %%a in ('time /t') do set "TM_H=%%a" & set "TM_M=%%b"
+
+rem ゼロ埋め
+if "!DT_M:~0,1!" == " " set DT_M=0!DT_M:~1,1!
+if "!DT_D:~0,1!" == " " set DT_D=0!DT_D:~1,1!
+if "!TM_H:~0,1!" == " " set TM_H=0!TM_H:~1,1!
+
+set "TIMESTAMP=!DT_Y!!DT_M!!DT_D!_!TM_H!!TM_M!"
+set "BACKUP_FOLDER=!BACKUP_DESTINATION!\!TIMESTAMP!"
+
+echo =================================================================
+echo バックアップを開始します...
+echo =================================================================
+echo.
+
+echo   コピー元: !BACKUP_SOURCE!
+echo   コピー先: !BACKUP_FOLDER!
+echo.
+
+if not exist "!BACKUP_SOURCE!" (
+    echo エラー: コピー元フォルダが見つかりません。
+    echo !BACKUP_SOURCE!
+    goto :EOF
+)
+
+if not exist "!BACKUP_DESTINATION!" (
+    echo 警告: コピー先フォルダの親が存在しません。作成します。
+    mkdir "!BACKUP_DESTINATION!"
+)
+
+echo フォルダを作成しています...
+mkdir "!BACKUP_FOLDER!"
+if errorlevel 1 (
+    echo エラー: フォルダの作成に失敗しました。
+    echo !BACKUP_FOLDER!
+    goto :EOF
+)
+
+echo ファイルをコピーしています...
+xcopy "!BACKUP_SOURCE!" "!BACKUP_FOLDER!\" /S /E /I /Y /Q
+
+if errorlevel 1 (
+    echo エラー: ファイルのコピー中にエラーが発生しました。
+    goto :EOF
+)
+
+echo.
+
+echo =================================================================
+echo バックアップが正常に完了しました。
+echo =================================================================
+echo.
+
+endlocal
+pause
+</code></pre>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

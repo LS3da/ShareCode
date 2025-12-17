@@ -1,0 +1,96 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #282c34; /* Dark background */
+    color: #abb2bf; /* Light gray text */
+}
+
+header {
+    background-color: #21252b; /* Slightly darker than body for contrast */
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+header h1 {
+    margin: 0;
+}
+
+main {
+    padding: 1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.code-block {
+    background-color: #21252b; /* Darker background for code blocks */
+    border: 1px solid #3a3f4b; /* Darker border */
+    border-radius: 5px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* More prominent shadow */
+}
+
+.code-title {
+    background-color: #2c313a; /* Slightly lighter than code-block background */
+    color: #e0e0e0; /* Lighter text for title */
+    margin: 0;
+    padding: 0.8rem 1rem;
+    font-size: 1.1rem;
+    border-bottom: 1px solid #3a3f4b; /* Darker border */
+}
+
+.collapsible .code-title {
+    cursor: pointer;
+    position: relative;
+}
+
+.collapsible .code-title::after {
+    content: '+';
+    position: absolute;
+    right: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+}
+
+.collapsible.active .code-title::after {
+    transform: rotate(45deg);
+    content: '×';
+}
+
+.code-content {
+    padding: 0 1rem;
+    max-height: 500px; /* デフォルトの最大高 */
+    overflow: auto;
+    transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+}
+
+.collapsible .code-content {
+    max-height: 0;
+    padding: 0 1rem;
+    overflow: hidden;
+}
+
+.collapsible.active .code-content {
+    max-height: 1000px; /* 展開時の最大高 */
+    padding: 1rem;
+    overflow: auto;
+}
+
+pre {
+    margin: 0;
+    background-color: #2d2d2d;
+    color: #f1f1f1;
+    padding: 1rem;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+code {
+    font-family: 'Consolas', 'Monaco', 'Menlo', monospace;
+    font-size: 0.95rem;
+}
