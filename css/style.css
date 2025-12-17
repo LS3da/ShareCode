@@ -40,20 +40,44 @@ main {
     padding: 0.8rem 1rem;
     font-size: 1.1rem;
     border-bottom: 1px solid #3a3f4b; /* Darker border */
+    position: relative; /* For positioning the copy button */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.copy-btn {
+    background-color: #61afef; /* A prominent blue */
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.2s;
+}
+
+.copy-btn:hover {
+    background-color: #528bce; /* A slightly darker blue on hover */
+}
+
+.copy-btn.copied {
+    background-color: #98c379; /* A green color to indicate success */
+    color: #fff;
 }
 
 .collapsible .code-title {
     cursor: pointer;
-    position: relative;
 }
 
 .collapsible .code-title::after {
     content: '+';
-    position: absolute;
-    right: 1rem;
+    /* position: absolute; */ /* No longer needed with flex */
+    /* right: 1rem; */
     font-size: 1.5rem;
     font-weight: bold;
     transition: transform 0.3s ease;
+    margin-left: 1rem;
 }
 
 .collapsible.active .code-title::after {
