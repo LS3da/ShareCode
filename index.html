@@ -299,6 +299,160 @@ exit
             </div>
             <p>注意 : このプログラムは起動時に実行させます。</p>
         </section>
+        <section class="code-block collapsible">
+            <h2 class="code-title">ZipDuster（クリックで展開） <button class="copy-btn">コピー</button></h2>
+            <div class="code-content">
+                <pre><code>@echo off
+chcp 65001 >nul
+cls
+
+:: ==============================================
+:: Settings
+:: ==============================================
+set "APP_NAME=ZipDusterTool"
+set "EXE_NAME=ZipDuster.bat"
+set "CONFIG_NAME=config.ini"
+set "SHORTCUT_NAME=ZipDuster.lnk"
+
+set "TARGET_DIR=%APPDATA%\%APP_NAME%"
+set "TARGET_PATH=%TARGET_DIR%\%EXE_NAME%"
+set "CONFIG_PATH=%TARGET_DIR%\%CONFIG_NAME%"
+
+set "SHORTCUT_DESKTOP=%USERPROFILE%\Desktop\%SHORTCUT_NAME%"
+set "SHORTCUT_STARTUP=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\%SHORTCUT_NAME%"
+
+:: ==============================================
+:: Check Install
+:: ==============================================
+if exist "%TARGET_PATH%" goto UNINSTALL_FLOW
+
+:INSTALL_FLOW
+echo ----------------------------------------------
+echo ZipDuster Installer
+echo ----------------------------------------------
+echo.
+echo 展開済みのZipファイルを整理する「ZipDuster」をインストールします。
+echo.
+set /p "start_choice=PC起動時に自動で実行するように設定しますか？ (y/n): "
+echo.
+pause
+
+echo.
+echo [1/4] Creating Folder...
+if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
+
+echo [2/4] Generating config.ini...
+(
+echo [Settings]
+echo ; DeleteMode: true=即削除, false=確認してから削除
+echo DeleteMode=false
+echo ; target_dir: 整理するフォルダのパス
+echo TargetDir=%USERPROFILE%\Downloads
+) > "%CONFIG_PATH%"
+
+echo [3/4] Creating Main File...
+powershell -Command "$raw = Get-Content '%~f0' -Encoding UTF8; $skip = 0; foreach($i in 0..($raw.Length-1)){ if($raw[$i] -eq ':: --- PAYLOAD_START ---'){ $skip = $i + 1; break } }; $content = $raw[$skip..($raw.Length-1)] -join \"`r`n\"; [System.IO.File]::WriteAllLines('%TARGET_PATH%', $content)"
+
+echo [4/4] Creating Shortcuts...
+:: デスクトップ用は必ず作成
+powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%SHORTCUT_DESKTOP%');$s.TargetPath='%TARGET_PATH%';$s.Save()"
+
+:: For startups, it's up to the user to choose
+if /i "%start_choice%"=="y" (
+    echo Registering with startup...
+    powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%SHORTCUT_STARTUP%');$s.TargetPath='%TARGET_PATH%';$s.Save()"
+) else (
+    echo Startup registration skipped.
+)
+
+echo.
+echo Install Completed!
+echo.
+pause
+exit
+
+:UNINSTALL_FLOW
+echo ----------------------------------------------
+echo ZipDuster Uninstaller
+echo ----------------------------------------------
+echo.
+set /p "choice=Uninstall ZipDuster? (y/n): "
+if /i not "%choice%"=="y" exit
+
+echo.
+echo [1/2] Removing Shortcuts...
+if exist "%SHORTCUT_DESKTOP%" del /f /q "%SHORTCUT_DESKTOP%"
+if exist "%SHORTCUT_STARTUP%" del /f /q "%SHORTCUT_STARTUP%"
+
+echo [2/2] Deleting Files...
+rd /s /q "%TARGET_DIR%" 2>nul
+
+echo.
+echo Delete Completed.
+pause
+exit
+
+:: --- PAYLOAD_START ---
+@echo off
+setlocal enabledelayedexpansion
+chcp 65001 >nul
+
+:: Load Settings File
+set "CONF=%~dp0config.ini"
+if not exist "%CONF%" (
+    echo Configuration file not found.
+    pause
+    exit
+)
+
+:: Extract settings from ini
+for /f "tokens=2 delims==" %%a in ('findstr "DeleteMode=" "%CONF%"') do set "MODE=%%a"
+for /f "tokens=2 delims==" %%a in ('findstr "TargetDir=" "%CONF%"') do set "CLEAN_DIR=%%a"
+
+echo ----------------------------------------------
+echo ZipDuster: Start organizing...
+echo Subject: %CLEAN_DIR%
+echo Mode: %MODE%
+echo ----------------------------------------------
+
+if not exist "%CLEAN_DIR%" (
+    echo The target folder does not exist.
+    pause
+    exit
+)
+
+pushd "%CLEAN_DIR%"
+set "found=0"
+
+for %%F in (*.zip) do (
+    set "BASE=%%~nF"
+    :: Check if a file or folder with the same name exists
+    if exist "!BASE!" (
+        set /a found+=1
+        echo discover: %%F (Deployed: !BASE!^)
+        
+        if /i "%MODE%"=="true" (
+            del /f /q "%%F"
+            echo -- It has been deleted.
+        ) else (
+            set /p "ans=%%F を削除しますか？ (y/n): "
+            if /i "!ans!"=="y" (
+                del /f /q "%%F"
+                echo -- It has been deleted.
+            )
+        )
+    )
+)
+
+popd
+
+echo.
+echo 整理が終わりました。見つけた対象: %found%
+pause
+</code></pre>
+            </div>
+            <p>説明 : これは、重複しているZipファイルを消去するものです。デフォルトではダウンロードフォルダで適用されます。</p>
+        </section>
     </main>
 
     <script src="js/script.js"></script>
