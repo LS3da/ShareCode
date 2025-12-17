@@ -15,7 +15,7 @@
 
     <main>
         <section class="code-block">
-            <h2 class="code-title">サンプルスクリプト1: Hello World <button class="copy-btn">コピー</button></h2>
+            <h2 class="code-title">Hello World <button class="copy-btn">コピー</button></h2>
             <div class="code-content">
                 <pre><code>@echo off
     echo Hello, World!
@@ -28,77 +28,276 @@
             <h2 class="code-title">乱数生成プログラム（クリックで展開） <button class="copy-btn">コピー</button></h2>
             <div class="code-content">
                 <pre><code>@echo off
-rem =================================================================
-rem ファイルバックアップスクリプト
-rem 指定されたフォルダのファイルを、日付付きのフォルダにコピーします。
-rem =================================================================
-
-setlocal enabledelayedexpansion
-
-rem --- 設定 ---
-set "BACKUP_SOURCE=C:\Users\YourUser\Documents"
-set "BACKUP_DESTINATION=D:\Backup"
-rem --- 設定ここまで ---
-
-rem 日付と時刻の取得
-for /f "tokens=1-3 delims=/ " %%a in ('date /t') do set "DT_Y=%%a" & set "DT_M=%%b" & set "DT_D=%%c"
-for /f "tokens=1-2 delims=: " %%a in ('time /t') do set "TM_H=%%a" & set "TM_M=%%b"
-
-rem ゼロ埋め
-if "!DT_M:~0,1!" == " " set DT_M=0!DT_M:~1,1!
-if "!DT_D:~0,1!" == " " set DT_D=0!DT_D:~1,1!
-if "!TM_H:~0,1!" == " " set TM_H=0!TM_H:~1,1!
-
-set "TIMESTAMP=!DT_Y!!DT_M!!DT_D!_!TM_H!!TM_M!"
-set "BACKUP_FOLDER=!BACKUP_DESTINATION!\!TIMESTAMP!"
-
-echo =================================================================
-echo バックアップを開始します...
-echo =================================================================
+cls
+echo Random Creater v1.21
+title Random Create
+echo To stop this program, press the close button in the upper-right corner.
+pause > NUL
 echo.
-
-echo   コピー元: !BACKUP_SOURCE!
-echo   コピー先: !BACKUP_FOLDER!
-echo.
-
-if not exist "!BACKUP_SOURCE!" (
-    echo エラー: コピー元フォルダが見つかりません。
-    echo !BACKUP_SOURCE!
-    goto :EOF
+set /p "Ranif=Please select a range (number only): "
+set /p yn_check="Create Log Files? (y/n)"
+IF %yn_check%==y (
+  set /a Count = 0
+  goto StartLog
+) ELSE (
+  goto StartNLog
 )
 
-if not exist "!BACKUP_DESTINATION!" (
-    echo 警告: コピー先フォルダの親が存在しません。作成します。
-    mkdir "!BACKUP_DESTINATION!"
-)
-
-echo フォルダを作成しています...
-mkdir "!BACKUP_FOLDER!"
-if errorlevel 1 (
-    echo エラー: フォルダの作成に失敗しました。
-    echo !BACKUP_FOLDER!
-    goto :EOF
-)
-
-echo ファイルをコピーしています...
-xcopy "!BACKUP_SOURCE!" "!BACKUP_FOLDER!\" /S /E /I /Y /Q
-
-if errorlevel 1 (
-    echo エラー: ファイルのコピー中にエラーが発生しました。
-    goto :EOF
-)
-
-echo.
-
-echo =================================================================
-echo バックアップが正常に完了しました。
-echo =================================================================
-echo.
-
-endlocal
+echo ERROR DEVELOPMENT BUGS!(NO END SUPPORT)
 pause
+exit
+
+
+:StartLog
+cls
+set /a Count = %Count%+1
+set /a RandomCounter = %RANDOM% * %Ranif% / 32767
+echo %Count%. %RandomCounter% >> RandomLog.txt
+echo %RandomCounter%
+echo.
+echo Press any key to generate again...
+echo.
+pause > NUL
+goto StartLog
+
+
+:StartNLog
+cls
+set /a RandomCounter = %RANDOM% * %Ranif% / 32767
+echo %RandomCounter%
+echo.
+echo Press any key to generate again...
+echo.
+pause > NUL
+goto StartNLog
 </code></pre>
             </div>
+        </section>
+        <section class="code-block">
+            <h2 class="code-title">ルーレット（クリックで展開）<button class="copy-btn">コピー</button></h2>
+            <div class="code-content">
+                <pre><code>@echo off
+chcp 65001 >nul
+cls
+
+:: ==============================================
+:: Setting Section
+:: ==============================================
+set "APP_NAME=RouletteTool"
+set "EXE_NAME=roulette.bat"
+set "SHORTCUT_NAME=ルーレット.lnk"
+
+set "TARGET_DIR=%APPDATA%\%APP_NAME%"
+set "TARGET_PATH=%TARGET_DIR%\%EXE_NAME%"
+set "SHORTCUT_PATH=%USERPROFILE%\Desktop\%SHORTCUT_NAME%"
+
+:: ==============================================
+:: Installed Check
+:: ==============================================
+if exist "%TARGET_PATH%" goto UNINSTALL_FLOW
+
+:INSTALL_FLOW
+echo ----------------------------------------------
+echo Roulette Installer
+echo ----------------------------------------------
+echo.
+echo ルーレットをインストールする場合は何かキーを押してください。
+echo.
+pause > NUL
+echo Roulette Install Starting...
+
+echo.
+echo [1/3] Folder Creating...
+if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
+
+echo [2/3] Generating main file...
+powershell -Command "$raw = Get-Content '%~f0' -Encoding UTF8; $skip = 0; foreach($i in 0..($raw.Length-1)){ if($raw[$i] -eq ':: --- PAYLOAD_START ---'){ $skip = $i + 1; break } }; $content = $raw[$skip..($raw.Length-1)] -join \"`r`n\"; [System.IO.File]::WriteAllLines('%TARGET_PATH%', $content)"
+
+echo [3/3] Creating Desktop Shortcut...
+powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%SHORTCUT_PATH%');$s.TargetPath='%TARGET_PATH%';$s.Save()"
+
+echo.
+echo ----------------------------------------------
+echo Install Completed!
+echo ----------------------------------------------
+echo.
+echo デスクトップの「%SHORTCUT_NAME%」から起動してください。
+echo.
+pause
+exit
+
+:UNINSTALL_FLOW
+echo ----------------------------------------------
+echo Roulette Uninstaller
+echo ----------------------------------------------
+echo.
+echo ルーレットのアンインストーラーへようこそ！
+echo.
+set /p "choice=アンインストールしますか？ (y/n): "
+
+if /i not "%choice%"=="y" (
+    echo.
+    echo 削除をキャンセルしました。ルーレットはまだそこにあります。
+    echo.
+    pause
+    exit
+)
+
+echo.
+echo [1/2] Remove desktop shortcut...
+if exist "%SHORTCUT_PATH%" del /f /q "%SHORTCUT_PATH%"
+
+echo [2/2] Deleting device and folder...
+if exist "%TARGET_PATH%" del /f /q "%TARGET_PATH%"
+rd "%TARGET_DIR%" 2>nul
+
+echo.
+echo ----------------------------------------------
+echo Delete Completed.
+echo ----------------------------------------------
+echo.
+pause
+exit
+
+:: --- PAYLOAD_START ---
+@echo off
+chcp 65001
+cls
+goto setup1
+
+:setup1
+echo 参加者数を教えてください。
+echo.
+set /p "Sankasha=Count: "
+
+for /l %%i in (1, 1, %Sankasha%) do (
+    set /p "SankaName%%i=参加者%%i人目: "
+)
+
+echo.
+echo 確認が取れました。ルーレットを開始するには何かキーを押してください...
+pause > NUL
+goto ruretto
+
+:ruretto
+cls
+setlocal EnableDelayedExpansion
+set /a rurettokekka = %RANDOM% %% %Sankasha%+1
+echo 抽選結果発表！
+echo.
+timeout /t 1 >nul
+echo 当選者は...
+echo.
+timeout /t 3 >nul
+echo !SankaName%rurettokekka%!だ！おめでとう！
+echo.
+echo 何かキーを押すと閉じれます。
+pause > NUL
+exit
+</code></pre>
+            </div>
+        </section>
+        <section class="code-block">
+            <h2 class="code-title">SkyCleanUp（クリックで展開）<button class="copy-btn">コピー</button></h2>
+            <div class="code-content">
+                <pre><code>@echo off
+chcp 65001 >nul
+cls
+
+:: ==============================================
+:: Settings
+:: ==============================================
+set "APP_NAME=SkyCleanUpTool"
+set "EXE_NAME=SkyCleanUp.bat"
+set "SHORTCUT_NAME=SkyCleanUp.lnk"
+
+:: 1. Location of the device (directly under AppData)
+set "TARGET_DIR=%APPDATA%\%APP_NAME%"
+set "TARGET_PATH=%TARGET_DIR%\%EXE_NAME%"
+
+:: 2. Shortcut location (Desktop and Startup)
+set "SHORTCUT_DESKTOP=%USERPROFILE%\Desktop\%SHORTCUT_NAME%"
+set "SHORTCUT_STARTUP=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\%SHORTCUT_NAME%"
+
+:: ==============================================
+:: Check Install
+:: ==============================================
+if exist "%TARGET_PATH%" goto UNINSTALL_FLOW
+
+:INSTALL_FLOW
+echo ----------------------------------------------
+echo SkyCleanUp Installer
+echo ----------------------------------------------
+echo.
+echo SkyCleanUpをインストールします。
+echo.
+pause
+echo.
+echo [1/3] Create Main Folder...
+if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
+
+echo [2/3] Creating Main File...
+:: Extract the bottom part of this batch (PAYLOAD) and save it in AppData.
+powershell -Command "$raw = Get-Content '%~f0' -Encoding UTF8; $skip = 0; foreach($i in 0..($raw.Length-1)){ if($raw[$i] -eq ':: --- PAYLOAD_START ---'){ $skip = $i + 1; break } }; $content = $raw[$skip..($raw.Length-1)] -join \"`r`n\"; [System.IO.File]::WriteAllLines('%TARGET_PATH%', $content)"
+
+echo [3/3] Creating Shortcut Files...
+:: Create Desktop Shortcut
+powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%SHORTCUT_DESKTOP%');$s.TargetPath='%TARGET_PATH%';$s.Save()"
+:: Create Startup Shortcut
+powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%SHORTCUT_STARTUP%');$s.TargetPath='%TARGET_PATH%';$s.Save()"
+
+echo.
+echo Install Completed.
+pause
+exit
+
+:UNINSTALL_FLOW
+echo ----------------------------------------------
+echo SkyCleanUp Uninstaller
+echo ----------------------------------------------
+echo.
+echo SkyCleanUpのアンインストーラーへようこそ。
+echo.
+set /p "choice=アンインストール（削除）しますか？ (y/n): "
+
+if /i not "%choice%"=="y" (
+    echo キャンセルしました。
+    pause
+    exit
+)
+
+echo.
+echo [1/2] Remove Shortcut...
+if exist "%SHORTCUT_DESKTOP%" del /f /q "%SHORTCUT_DESKTOP%"
+if exist "%SHORTCUT_STARTUP%" del /f /q "%SHORTCUT_STARTUP%"
+
+echo [2/2] Delete Main Files...
+:: Delete the main file and then delete the folder itself.
+if exist "%TARGET_PATH%" del /f /q "%TARGET_PATH%"
+rd /s /q "%TARGET_DIR%" 2>nul
+
+echo.
+echo Delete Complete
+pause
+exit
+
+:: --- PAYLOAD_START ---
+@echo off
+echo This is SkyCleanUp Process. As long as it's open, the process will continue to run.
+echo.
+echo ===========================
+echo.
+goto start
+:start
+taskkill /im SclsToolBar.exe /f 2>NUL
+taskkill /im lanusr.exe /f 2>NUL
+taskkill /im bcGC.exe /f 2>NUL
+timeout /t 15 > nul
+goto start
+exit
+</code></pre>
+            </div>
+            <p>注意 : このプログラムは起動時に実行させます。>ちゅ>
         </section>
     </main>
 
