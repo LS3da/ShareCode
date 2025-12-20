@@ -74,7 +74,7 @@ goto StartNLog
             </div>
         </section>
         <section class="code-block collapsible">
-            <h2 class="code-title">ルーレット（クリックで展開） <button class="copy-btn">コピー</button></h2>
+            <h2 class="code-title">ルーレット ｲﾝｽﾄｰﾗ（クリックで展開） <button class="copy-btn">コピー</button></h2>
             <div class="code-content">
                 <pre><code>@echo off
 chcp 65001 >nul
@@ -198,7 +198,7 @@ exit
             </div>
         </section>
         <section class="code-block collapsible">
-            <h2 class="code-title">SkyCleanUp（クリックで展開） <button class="copy-btn">コピー</button></h2>
+            <h2 class="code-title">SkyCleanUp Installer（クリックで展開） <button class="copy-btn">コピー</button></h2>
             <div class="code-content">
                 <pre><code>@echo off
 chcp 65001 >nul
@@ -300,7 +300,7 @@ exit
             <p>注意 : このプログラムは起動時に実行させます。</p>
         </section>
         <section class="code-block collapsible">
-            <h2 class="code-title">ZipDuster（クリックで展開） <button class="copy-btn">コピー</button></h2>
+            <h2 class="code-title">ZipDuster Installer（クリックで展開） <button class="copy-btn">コピー</button></h2>
             <div class="code-content">
                 <pre><code>@echo off
 chcp 65001 >nul
@@ -452,6 +452,141 @@ pause
 </code></pre>
             </div>
             <p>説明 : これは、重複しているZipファイルを消去するものです。デフォルトではダウンロードフォルダで適用されます。</p>
+        </section>
+        <section class="code-block collapsible">
+            <h2 class="code-title">FileSorter Installer（クリックで展開） <button class="copy-btn">コピー</button></h2>
+            <div class="code-content">
+                <pre><code>@echo off
+chcp 65001 >nul
+cls
+
+:: ==============================================
+:: Settings
+:: ==============================================
+set "APP_NAME=FileSorterTool"
+set "EXE_NAME=FileSorter.bat"
+set "CONFIG_NAME=config.ini"
+set "SHORTCUT_NAME=FileSorter.lnk"
+
+set "TARGET_DIR=%APPDATA%\%APP_NAME%"
+set "TARGET_PATH=%TARGET_DIR%\%EXE_NAME%"
+set "CONFIG_PATH=%TARGET_DIR%\%CONFIG_NAME%"
+
+set "SHORTCUT_DESKTOP=%USERPROFILE%\Desktop\%SHORTCUT_NAME%"
+set "SHORTCUT_STARTUP=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\%SHORTCUT_NAME%"
+
+:: ==============================================
+:: Check Install
+:: ==============================================
+if exist "%TARGET_PATH%" goto UNINSTALL_FLOW
+
+:INSTALL_FLOW
+echo ----------------------------------------------
+echo FileSorter Installer
+echo ----------------------------------------------
+echo.
+echo 拡張子ごとにファイルを自動仕分けする「FileSorter」をインストールします。
+echo.
+set /p "start_choice=PC起動時に自動で実行するように設定しますか？ (y/n): "
+echo.
+pause
+
+echo.
+echo [1/4] Creating Folder...
+if not exist "%TARGET_DIR%" mkdir "%TARGET_DIR%"
+
+echo [2/4] Generating config.ini...
+(
+echo [Settings]
+echo ; target_dir: 仕分け対象のフォルダ
+echo TargetDir=%USERPROFILE%\Downloads
+echo.
+echo [Extensions]
+echo ; 拡張子=移動先フォルダ名
+echo .jpg=Images
+echo .png=Images
+echo .gif=Images
+echo .mp4=Videos
+echo .mp3=Music
+echo .wav=Music
+echo .zip=Archives
+echo .pdf=Documents
+echo .docx=Documents
+echo .xlsx=Documents
+echo .txt=TextFiles
+echo .exe=Application
+) > "%CONFIG_PATH%"
+
+echo [3/4] Creating Main File...
+powershell -Command "$raw = Get-Content '%~f0' -Encoding UTF8; $skip = 0; foreach($i in 0..($raw.Length-1)){ if($raw[$i] -eq ':: --- PAYLOAD_START ---'){ $skip = $i + 1; break } }; $content = $raw[$skip..($raw.Length-1)] -join \"`r`n\"; [System.IO.File]::WriteAllLines('%TARGET_PATH%', $content)"
+
+echo [4/4] Creating Shortcuts...
+powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%SHORTCUT_DESKTOP%');$s.TargetPath='%TARGET_PATH%';$s.Save()"
+
+if /i "%start_choice%"=="y" (
+    echo スタートアップへの登録を実行中...
+    powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%SHORTCUT_STARTUP%');$s.TargetPath='%TARGET_PATH%';$s.Save()"
+)
+
+echo.
+echo Install Completed!
+echo config.ini で仕分けルールをカスタマイズできます。
+pause
+exit
+
+:UNINSTALL_FLOW
+echo ----------------------------------------------
+echo FileSorter Uninstaller
+echo ----------------------------------------------
+echo.
+set /p "choice=Uninstall FileSorter? (y/n): "
+if /i not "%choice%"=="y" exit
+
+echo.
+echo [1/2] Removing Shortcuts...
+if exist "%SHORTCUT_DESKTOP%" del /f /q "%SHORTCUT_DESKTOP%"
+if exist "%SHORTCUT_STARTUP%" del /f /q "%SHORTCUT_STARTUP%"
+
+echo [2/2] Deleting Files...
+rd /s /q "%TARGET_DIR%" 2>nul
+
+echo.
+echo Delete Completed.
+pause
+exit
+
+:: --- PAYLOAD_START ---
+@echo off
+setlocal enabledelayedexpansion
+chcp 65001 >nul
+
+set "CONF=%~dp0config.ini"
+if not exist "%CONF%" exit
+
+:: 対象ディレクトリの取得
+for /f "tokens=2 delims==" %%a in ('findstr "TargetDir=" "%CONF%"') do set "CLEAN_DIR=%%a"
+
+if not exist "%CLEAN_DIR%" exit
+pushd "%CLEAN_DIR%"
+
+:: [Extensions]セクション以降を読み込んで仕分け実行
+for /f "tokens=1,2 delims==" %%e in ('findstr /R "^\..*=" "%CONF%"') do (
+    set "EXT=%%e"
+    set "FOLDER=%%f"
+    
+    :: その拡張子のファイルがあるか確認（自分自身やiniは除外されるはずだが念のため）
+    if exist "*!EXT!" (
+        if not exist "!FOLDER!" mkdir "!FOLDER!"
+        echo [Moving] *!EXT! -^> !FOLDER!
+        move /y "*!EXT!" "!FOLDER!\" >nul 2>&1
+    )
+)
+
+popd
+exit
+</code></pre>
+            </div>
+            <p>説明 : 拡張子ごとにファイルを自動仕分けします。</p>
         </section>
     </main>
 
